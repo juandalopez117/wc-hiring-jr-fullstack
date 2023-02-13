@@ -40,33 +40,26 @@ $t.answer(1, async () => {
   // Your code goes here
   let income = 0;
   let expenses = 0;
-  let Restaurants = 0;
-  let Income = 0;
-  let Groceries = 0;
-  let Rent = 0;
-
   let byCategories = {
-    Restaurants,
-    Income,
-    Groceries,
-    Rent,
+    Restaurants: 0,
+    Income: 0,
+    Groceries: 0,
+    Rent: 0,
   };
-  _.map(source, (el) => {
-    if (el.category === "Income") {
-      byCategories.Income = byCategories.Income + el.amount;
-    } else {
-      byCategories[el.category] = byCategories[el.category] - el.amount;
-    }
 
-    if (el.type === "income") {
-      income += el.amount;
-    } else {
-      expenses += el.amount;
-    }
+  let Part = _.partition(source, (el) => el["category"] === "Income");
+  let [Part0, Part1] = Part;
+
+  _.map(Part0, (el) => {
+    byCategories["Income"] += el["amount"];
+    income += el["amount"];
+  });
+  _.map(Part1, (el) => {
+    byCategories[el["category"]] -= el["amount"];
+    expenses += el["amount"];
   });
 
   let balance = income - expenses;
-
   return {
     balance,
     income,
@@ -90,12 +83,11 @@ $t.answer(2, async () => {
   // 3. Return array of texts
 
   let ids = await $source.getIds();
-  let texts = await Promise.all(
-    await _.map(ids, async (el) => {
-      let text = await await $source.getText(el);
+  let texts = Promise.all(
+    _.map(ids, async (el) => {
+      let text = await $source.getText(el);
       return text;
     })
   );
-
   return texts;
 });
